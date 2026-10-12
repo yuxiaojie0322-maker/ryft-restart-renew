@@ -43,7 +43,7 @@ jobs:
 
       - name: ⚡ 执行隧道检测与自动开机
         env:
-          TUNNEL_URL: 'https://ryft.blbli.kdns.fr'
+          TUNNEL_URL: 'https://ryft.blibli.kdns.fr'
           RYFT_SESSION: ${{ secrets.RYFT_SESSION }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           SERVER_NAME: ${{ secrets.SERVER_NAME }}
