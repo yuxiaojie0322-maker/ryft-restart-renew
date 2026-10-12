@@ -1,0 +1,61 @@
+name: Ryft.host Keepalive & Auto Start
+
+on:
+  schedule:
+    # 每天 UTC 03:00 和 15:00（北京时间 11:00 和 23:00）自动巡检保活
+    - cron: '0 3,15 * * *'
+  workflow_dispatch:
+  # 支持 Uptime Kuma 掉线通过 Webhook 远程调用拉起
+  repository_dispatch:
+    types: [tunnel_offline, ryft_start, restart_keepalive]
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  start-server:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出当前仓库
+        uses: actions/checkout@v4
+
+      - name: 检出私有核心脚本
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/my-private-scripts
+          path: private-scripts
+          token: ${{ secrets.CORE_SCRIPT_TOKEN }}
+
+      - name: ⚙ 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 🛠️ 安装环境与浏览器
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb
+          pip install -r private-scripts/ryft/requirements.txt
+          python -m patchright install --with-deps chrome
+
+      - name: ⚡ 执行隧道检测与自动开机
+        env:
+          TUNNEL_URL: 'https://ryft.blbli.kdns.fr'
+          RYFT_SESSION: ${{ secrets.RYFT_SESSION }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          SERVER_NAME: ${{ secrets.SERVER_NAME }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" python -u private-scripts/ryft/ryft_start.py
+
+      - name: 📤 保存执行截图快照
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ryft-screenshots
+          path: "*.png"
+          retention-days: 3
