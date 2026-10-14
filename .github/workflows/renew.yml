@@ -5,6 +5,12 @@ on:
     # 每天 UTC 03:00 和 15:00（北京时间 11:00 和 23:00）自动巡检保活
     - cron: '0 3,15 * * *'
   workflow_dispatch:
+    inputs:
+      force_restart:
+        description: '是否强制开机/重启 (忽略在线检测)'
+        required: false
+        default: false
+        type: boolean
   # 支持 Uptime Kuma 掉线通过 Webhook 远程调用拉起
   repository_dispatch:
     types: [tunnel_offline, ryft_start, restart_keepalive]
@@ -48,6 +54,7 @@ jobs:
           CF_CLEARANCE: ${{ secrets.CF_CLEARANCE }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           SERVER_NAME: ${{ secrets.SERVER_NAME }}
+          FORCE_RESTART: ${{ inputs.force_restart || 'false' }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
         run: |
