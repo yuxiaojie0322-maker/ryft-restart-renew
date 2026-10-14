@@ -45,6 +45,7 @@ jobs:
         env:
           TUNNEL_URL: 'https://ryft.blibli.kdns.fr'
           RYFT_SESSION: ${{ secrets.RYFT_SESSION }}
+          CF_CLEARANCE: ${{ secrets.CF_CLEARANCE }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           SERVER_NAME: ${{ secrets.SERVER_NAME }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
